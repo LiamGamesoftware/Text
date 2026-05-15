@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="icon" type="image/png" href="https://drive.google.com/uc?export=download&id=1MabD2CJuF6JlVyz2fHVD-kF63qcSKo02">
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <style>
     :root {
       --cyan: #00ffff;
@@ -36,12 +37,10 @@
 
     #app { height: 100%; display: flex; flex-direction: column; }
 
-    /* ─── SCROLLBAR ─────────────────────────── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-    /* ─── AUTH ──────────────────────────────── */
     .auth-screen {
       height: 100%;
       display: flex;
@@ -159,7 +158,6 @@
       display: none;
     }
 
-    /* ─── APP LAYOUT ────────────────────────── */
     .app-layout {
       height: 100%;
       display: flex;
@@ -167,7 +165,6 @@
       overflow: hidden;
     }
 
-    /* ─── SIDEBAR ───────────────────────────── */
     .sidebar {
       width: 300px;
       min-width: 300px;
@@ -229,15 +226,6 @@
     .search-input:focus { border-color: var(--cyan); }
     .search-input::placeholder { color: var(--text-muted); }
 
-    .conv-section-label {
-      padding: 0 16px 8px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--text-muted);
-    }
-
     .conv-list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
 
     .conv-empty {
@@ -288,7 +276,6 @@
     }
 
     .av-md { width: 42px; height: 42px; }
-    .av-sm { width: 36px; height: 36px; font-size: 12px; }
     .av-lg { width: 72px; height: 72px; font-size: 28px; font-weight: 800; }
 
     .conv-info { flex: 1; min-width: 0; }
@@ -320,14 +307,6 @@
 
     .conv-time { font-size: 11px; color: var(--text-muted); }
 
-    .unread-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--cyan);
-      border-radius: 50%;
-    }
-
-    /* ─── CHAT AREA ─────────────────────────── */
     .chat-area {
       flex: 1;
       display: flex;
@@ -378,14 +357,6 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-    }
-
-    .date-chip {
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-muted);
-      padding: 12px 0 8px;
-      letter-spacing: 0.3px;
     }
 
     .msg-row {
@@ -476,7 +447,6 @@
     .send-btn:active { transform: scale(0.9); }
     .send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-    /* ─── PROFILE SLIDE ─────────────────────── */
     .profile-slide {
       position: absolute;
       inset: 0;
@@ -521,22 +491,6 @@
     .profile-name-lg { font-size: 24px; font-weight: 800; margin: 16px 0 4px; letter-spacing: -0.5px; }
     .profile-email-lg { font-size: 13px; color: var(--text-muted); margin-bottom: 48px; }
 
-    .info-row {
-      width: 100%;
-      max-width: 380px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .info-label { font-size: 12px; color: var(--text-muted); font-weight: 600; }
-    .info-val { font-size: 14px; font-weight: 500; }
-
     .logout-btn {
       width: 100%;
       max-width: 380px;
@@ -555,7 +509,6 @@
 
     .logout-btn:hover { background: var(--danger-dim); }
 
-    /* ─── MODAL ─────────────────────────────── */
     .overlay {
       position: absolute;
       inset: 0;
@@ -619,31 +572,15 @@
 
     .btn-modal-ok:hover { opacity: 0.82; }
 
-    /* ─── ANIMATIONS ────────────────────────── */
     @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
     @keyframes slideUp { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
     @keyframes scaleIn { from { opacity: 0; transform: scale(0.94) } to { opacity: 1; transform: scale(1) } }
     @keyframes msgPop { from { opacity: 0; transform: translateY(5px) } to { opacity: 1; transform: translateY(0) } }
 
-    /* ─── MOBILE ────────────────────────────── */
     @media (max-width: 620px) {
-      .sidebar {
-        width: 100%;
-        min-width: 100%;
-        position: absolute;
-        inset: 0;
-        z-index: 10;
-        border-right: none;
-      }
-
+      .sidebar { width: 100%; min-width: 100%; position: absolute; inset: 0; z-index: 10; border-right: none; }
       .sidebar.hidden { display: none; }
-
-      .chat-area {
-        position: absolute;
-        inset: 0;
-        z-index: 20;
-      }
-
+      .chat-area { position: absolute; inset: 0; z-index: 20; }
       .chat-area.hidden { display: none; }
       .back-chevron { display: flex; }
     }
@@ -652,50 +589,29 @@
 <body>
 <div id="app"></div>
 <script>
-/* ═══════════════════════════════════════════════════════
-   STORAGE HELPERS
-═══════════════════════════════════════════════════════ */
+const serverURL = "http://localhost:3000";
+let socket = null;
+
 const LS = {
   get: k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } },
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
-  rm:  k => localStorage.removeItem(k),
+  rm: k => localStorage.removeItem(k),
 };
 
-const KEY = {
-  users:    'lc_users',
-  session:  'lc_session',
-  contacts: e => `lc_contacts_${e}`,
-  conv:     id => `lc_conv_${id}`,
-};
+const KEY = { users: 'lc_users', session: 'lc_session' };
 
-function getUsers()           { return LS.get(KEY.users)    || {} }
-function setUsers(u)          { LS.set(KEY.users, u) }
-function getSession()         { return LS.get(KEY.session) }
-function setSession(e)        { LS.set(KEY.session, e) }
-function clearSession()       { LS.rm(KEY.session) }
-function getContacts(e)       { return LS.get(KEY.contacts(e)) || [] }
-function setContacts(e, arr)  { LS.set(KEY.contacts(e), arr) }
-function getMessages(id)      { return LS.get(KEY.conv(id))    || [] }
-function setMessages(id, arr) { LS.set(KEY.conv(id), arr) }
+function getUsers() { return LS.get(KEY.users) || {} }
+function setUsers(u) { LS.set(KEY.users, u) }
+function getSession() { return LS.get(KEY.session) }
+function setSession(e) { LS.set(KEY.session, e) }
+function clearSession() { LS.rm(KEY.session) }
 
-function convId(a, b) { return [a, b].sort().join('~~~') }
-
-/* ═══════════════════════════════════════════════════════
-   CRYPTO
-═══════════════════════════════════════════════════════ */
 async function hashPw(pw) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw + 'lc_salt_2024'));
   return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-/* ═══════════════════════════════════════════════════════
-   UTILS
-═══════════════════════════════════════════════════════ */
-const AVATAR_COLORS = [
-  '#00cc99','#ff6b6b','#ffd93d','#a29bfe','#fd79a8',
-  '#74b9ff','#00cec9','#e17055','#6c5ce7','#55efc4',
-  '#fdcb6e','#81ecec','#fab1a0',
-];
+const AVATAR_COLORS = ['#00cc99','#ff6b6b','#ffd93d','#a29bfe','#fd79a8','#74b9ff','#00cec9','#e17055','#6c5ce7','#55efc4','#fdcb6e','#81ecec','#fab1a0'];
 
 function avatarColor(email) {
   let h = 0;
@@ -708,15 +624,13 @@ function initials(name) {
 }
 
 function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 function fmtShort(ts) {
   const d = new Date(ts), now = new Date(), diff = now - d;
-  if (diff < 55000)    return 'now';
-  if (diff < 3600000)  return `${Math.floor(diff/60000)}m`;
+  if (diff < 55000) return 'now';
+  if (diff < 3600000) return `${Math.floor(diff/60000)}m`;
   if (diff < 86400000) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   if (diff < 604800000) return d.toLocaleDateString([],{weekday:'short'});
   return d.toLocaleDateString([],{month:'short',day:'numeric'});
@@ -726,66 +640,60 @@ function fmtTime(ts) {
   return new Date(ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
 }
 
-function fmtDate(ts) {
-  const d = new Date(ts), now = new Date(), diff = now - d;
-  if (diff < 86400000)   return 'Today';
-  if (diff < 172800000)  return 'Yesterday';
-  return d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});
-}
-
 function validateEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) }
 
-/* ═══════════════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════════════ */
-let me         = null;     // current user object
-let chatWith   = null;     // email of open chat
-let panel      = null;     // 'profile' | null
-let showModal  = null;     // 'add' | null
-let authMode   = 'login';  // 'login' | 'register'
-let searchQ    = '';
-let mobileView = 'list';   // 'list' | 'chat' (mobile only)
+let me = null, chatWith = null, panel = null, showModal = null, authMode = 'login', searchQ = '', mobileView = 'list';
+let serverData = { contacts: [], conversations: {} };
 
-/* ═══════════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════════ */
+function initSocket() {
+  socket = io(serverURL);
+  
+  socket.on("connect", () => {
+    console.log("Connected to server");
+    if (me) socket.emit("register_user", me.email);
+  });
+
+  socket.on("user_data_loaded", (data) => {
+    serverData = data;
+    updateConvList();
+  });
+
+  socket.on("receive_message", (payload) => {
+    const { from, message, convKey } = payload;
+    if (!serverData.conversations[convKey]) serverData.conversations[convKey] = [];
+    serverData.conversations[convKey].push(message);
+    if (chatWith === from || chatWith === payload.from) updateMsgArea();
+    updateConvList();
+  });
+
+  socket.on("contact_added", (data) => {
+    if (!serverData.contacts.includes(data.email)) {
+      serverData.contacts.push(data.email);
+      updateConvList();
+    }
+  });
+}
+
 function init() {
   const email = getSession();
   if (email) {
     const users = getUsers();
     if (users[email]) {
       me = users[email];
+      initSocket();
       render();
       return;
     }
   }
   render();
-
-  // Cross-tab messaging
-  window.addEventListener('storage', e => {
-    if (!me) return;
-    if (e.key && e.key.startsWith('lc_conv_')) {
-      updateMsgArea();
-      updateConvList();
-    }
-  });
 }
-
-// Polling for same-tab demo
-setInterval(() => {
-  if (me && chatWith) updateMsgArea();
-  if (me) updateConvList();
-}, 1500);
 
 window.addEventListener('resize', () => { if (me) render() });
 
-/* ═══════════════════════════════════════════════════════
-   AUTH ACTIONS
-═══════════════════════════════════════════════════════ */
 async function doLogin(ev) {
   ev && ev.preventDefault();
   const email = val('i-email').toLowerCase().trim();
-  const pw    = val('i-pw');
+  const pw = val('i-pw');
   if (!email || !pw) return showErr('auth-err','Please fill in all fields.');
   const users = getUsers();
   if (!users[email]) return showErr('auth-err','No account found with that email.');
@@ -793,17 +701,18 @@ async function doLogin(ev) {
   if (users[email].passwordHash !== hash) return showErr('auth-err','Incorrect password.');
   me = users[email];
   setSession(email);
+  initSocket();
   render();
 }
 
 async function doRegister(ev) {
   ev && ev.preventDefault();
-  const name  = val('i-name').trim();
+  const name = val('i-name').trim();
   const email = val('i-email').toLowerCase().trim();
-  const pw    = val('i-pw');
+  const pw = val('i-pw');
   if (!name || !email || !pw) return showErr('auth-err','Please fill in all fields.');
-  if (!validateEmail(email))  return showErr('auth-err','Enter a valid email address.');
-  if (pw.length < 6)          return showErr('auth-err','Password must be at least 6 characters.');
+  if (!validateEmail(email)) return showErr('auth-err','Enter a valid email address.');
+  if (pw.length < 6) return showErr('auth-err','Password must be at least 6 characters.');
   const users = getUsers();
   if (users[email]) return showErr('auth-err','An account already exists with that email.');
   const hash = await hashPw(pw);
@@ -812,18 +721,17 @@ async function doRegister(ev) {
   setUsers(users);
   me = user;
   setSession(email);
+  initSocket();
   render();
 }
 
 function doLogout() {
   me = null; chatWith = null; panel = null; showModal = null;
   clearSession();
+  if (socket) socket.disconnect();
   render();
 }
 
-/* ═══════════════════════════════════════════════════════
-   CHAT ACTIONS
-═══════════════════════════════════════════════════════ */
 async function doAddContact(ev) {
   ev && ev.preventDefault();
   const email = val('i-contact').toLowerCase().trim();
@@ -832,30 +740,32 @@ async function doAddContact(ev) {
   if (!validateEmail(email)) return showErr('add-err','Enter a valid email address.');
   const users = getUsers();
   if (!users[email]) return showErr('add-err','No Liam Chats account found with that email.');
-  const contacts = getContacts(me.email);
-  if (contacts.includes(email)) return showErr('add-err','Already in your contacts.');
-  contacts.push(email);
-  setContacts(me.email, contacts);
-  // Mutual add
-  const theirContacts = getContacts(email);
-  if (!theirContacts.includes(me.email)) {
-    theirContacts.push(me.email);
-    setContacts(email, theirContacts);
-  }
+  if (serverData.contacts.includes(email)) return showErr('add-err','Already in your contacts.');
+  
+  serverData.contacts.push(email);
+  socket.emit("add_contact_mutual", { myEmail: me.email, contactEmail: email });
+  socket.emit("save_contacts", { email: me.email, contacts: serverData.contacts });
+  
   showModal = null;
-  chatWith  = email;
+  chatWith = email;
   mobileView = 'chat';
   render();
 }
 
 function sendMsg() {
-  const ta   = document.getElementById('chat-ta');
+  const ta = document.getElementById('chat-ta');
   const text = ta ? ta.value.trim() : '';
   if (!text || !chatWith) return;
-  const id   = convId(me.email, chatWith);
-  const msgs = getMessages(id);
-  msgs.push({ id: `${Date.now()}-${Math.random()}`, from: me.email, text, ts: Date.now(), read: false });
-  setMessages(id, msgs);
+  
+  const convKey = [me.email, chatWith].sort().join('~~~');
+  const message = { id: `${Date.now()}-${Math.random()}`, from: me.email, text, ts: Date.now(), read: false };
+  
+  if (!serverData.conversations[convKey]) serverData.conversations[convKey] = [];
+  serverData.conversations[convKey].push(message);
+  
+  socket.emit("send_message", { from: me.email, to: chatWith, message });
+  socket.emit("save_messages", { email1: me.email, email2: chatWith, messages: serverData.conversations[convKey] });
+  
   ta.value = '';
   ta.style.height = 'auto';
   updateMsgArea();
@@ -864,21 +774,12 @@ function sendMsg() {
 }
 
 function openChat(email) {
-  chatWith   = email;
+  chatWith = email;
   mobileView = 'chat';
-  showModal  = null;
-  panel      = null;
-  markRead(email);
+  showModal = null;
+  panel = null;
   renderApp();
   setTimeout(scrollBottom, 60);
-}
-
-function markRead(email) {
-  const id   = convId(me.email, email);
-  const msgs = getMessages(id);
-  let changed = false;
-  msgs.forEach(m => { if (m.from !== me.email && !m.read) { m.read = true; changed = true; } });
-  if (changed) setMessages(id, msgs);
 }
 
 function scrollBottom() {
@@ -886,368 +787,90 @@ function scrollBottom() {
   if (el) el.scrollTop = el.scrollHeight;
 }
 
-/* ═══════════════════════════════════════════════════════
-   DOM HELPERS
-═══════════════════════════════════════════════════════ */
 function val(id) { const el = document.getElementById(id); return el ? el.value : '' }
-
-function showErr(id, msg) {
-  const el = document.getElementById(id);
-  if (el) { el.textContent = msg; el.style.display = 'block'; }
-}
-
+function showErr(id, msg) { const el = document.getElementById(id); if (el) { el.textContent = msg; el.style.display = 'block'; } }
 function $(id) { return document.getElementById(id) }
 
-/* ═══════════════════════════════════════════════════════
-   RENDER — AUTH
-═══════════════════════════════════════════════════════ */
 function renderAuth() {
   const isReg = authMode === 'register';
-  document.getElementById('app').innerHTML = `
-    <div class="auth-screen">
-      <div class="auth-wordmark">Liam Chats</div>
-      <div class="auth-sub">Talk to anyone, instantly.</div>
-      <div class="auth-card">
-        <div class="auth-tabs">
-          <button class="auth-tab ${!isReg?'active':''}" onclick="switchAuth('login')">Sign In</button>
-          <button class="auth-tab ${isReg?'active':''}"  onclick="switchAuth('register')">Create Account</button>
-        </div>
-        <div class="err-box" id="auth-err"></div>
-        ${isReg ? `
-          <div class="form-group">
-            <label class="form-label">Display Name</label>
-            <input id="i-name" class="form-input" type="text" placeholder="Your name" autocomplete="name">
-          </div>
-        ` : ''}
-        <div class="form-group">
-          <label class="form-label">Email</label>
-          <input id="i-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input id="i-pw" class="form-input" type="password" placeholder="${isReg?'Min. 6 characters':'Your password'}" autocomplete="${isReg?'new-password':'current-password'}">
-        </div>
-        <button class="btn-primary" id="auth-btn">${isReg?'Create Account':'Sign In'}</button>
-      </div>
-    </div>
-  `;
+  document.getElementById('app').innerHTML = `<div class="auth-screen"><div class="auth-wordmark">Liam Chats</div><div class="auth-sub">Talk to anyone, instantly.</div><div class="auth-card"><div class="auth-tabs"><button class="auth-tab ${!isReg?'active':''}" onclick="switchAuth('login')">Sign In</button><button class="auth-tab ${isReg?'active':''}" onclick="switchAuth('register')">Create Account</button></div><div class="err-box" id="auth-err"></div>${isReg ? `<div class="form-group"><label class="form-label">Display Name</label><input id="i-name" class="form-input" type="text" placeholder="Your name" autocomplete="name"></div>` : ''}<div class="form-group"><label class="form-label">Email</label><input id="i-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email"></div><div class="form-group"><label class="form-label">Password</label><input id="i-pw" class="form-input" type="password" placeholder="${isReg?'Min. 6 characters':'Your password'}" autocomplete="${isReg?'new-password':'current-password'}"></div><button class="btn-primary" id="auth-btn">${isReg?'Create Account':'Sign In'}</button></div></div>`;
 
   const btn = $('auth-btn');
   btn.addEventListener('click', isReg ? doRegister : doLogin);
 
   const onEnter = fn => e => { if (e.key === 'Enter') fn(e) };
   $('i-email')?.addEventListener('keydown', onEnter(isReg ? doRegister : doLogin));
-  $('i-pw')  ?.addEventListener('keydown', onEnter(isReg ? doRegister : doLogin));
+  $('i-pw')?.addEventListener('keydown', onEnter(isReg ? doRegister : doLogin));
   $('i-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') $('i-email').focus() });
 }
 
 function switchAuth(mode) { authMode = mode; render() }
 
-/* ═══════════════════════════════════════════════════════
-   RENDER — APP
-═══════════════════════════════════════════════════════ */
 function renderApp() {
   const isMobile = window.innerWidth <= 620;
-  const sideHide  = isMobile && mobileView === 'chat' ? 'hidden' : '';
-  const chatHide  = isMobile && mobileView === 'list' ? 'hidden' : '';
+  const sideHide = isMobile && mobileView === 'chat' ? 'hidden' : '';
+  const chatHide = isMobile && mobileView === 'list' ? 'hidden' : '';
 
-  const users    = getUsers();
-  const contacts = getContacts(me.email);
+  const users = getUsers();
+  const contacts = serverData.contacts || [];
 
-  // Build sorted conversation list
   const convs = contacts.map(email => {
-    const id    = convId(me.email, email);
-    const msgs  = getMessages(id);
-    const last  = msgs[msgs.length - 1] || null;
-    const unread = msgs.filter(m => m.from !== me.email && !m.read).length;
-    return { email, name: users[email]?.name || email, last, unread, ts: last?.ts || 0 };
+    const convKey = [me.email, email].sort().join('~~~');
+    const msgs = serverData.conversations[convKey] || [];
+    const last = msgs[msgs.length - 1] || null;
+    return { email, name: users[email]?.name || email, last, ts: last?.ts || 0 };
   }).sort((a,b) => b.ts - a.ts);
 
-  const filtered = searchQ
-    ? convs.filter(c => c.name.toLowerCase().includes(searchQ.toLowerCase()) || c.email.toLowerCase().includes(searchQ.toLowerCase()))
-    : convs;
+  const filtered = searchQ ? convs.filter(c => c.name.toLowerCase().includes(searchQ.toLowerCase()) || c.email.toLowerCase().includes(searchQ.toLowerCase())) : convs;
 
-  // Sidebar conv list HTML
   let convListHTML = '';
   if (filtered.length === 0) {
-    convListHTML = `
-      <div class="conv-empty">
-        <span class="conv-empty-title">${contacts.length === 0 ? 'No contacts yet' : 'No results'}</span>
-        ${contacts.length === 0 ? 'Tap <strong>+</strong> to start a conversation.' : 'Try a different name or email.'}
-      </div>`;
+    convListHTML = `<div class="conv-empty"><span class="conv-empty-title">${contacts.length === 0 ? 'No contacts yet' : 'No results'}</span>${contacts.length === 0 ? 'Tap <strong>+</strong> to start a conversation.' : 'Try a different name or email.'}</div>`;
   } else {
     convListHTML = filtered.map(c => {
-      const active  = c.email === chatWith ? 'active' : '';
+      const active = c.email === chatWith ? 'active' : '';
       const preview = c.last ? (c.last.from === me.email ? 'You: ' : '') + c.last.text : 'No messages yet';
-      const color   = avatarColor(c.email);
-      return `
-        <div class="conv-item ${active}" onclick="openChat('${esc(c.email)}')">
-          <div class="avatar av-md" style="background:${color}">${esc(initials(c.name))}</div>
-          <div class="conv-info">
-            <div class="conv-name">${esc(c.name)}</div>
-            <div class="conv-preview">${esc(preview.slice(0,55))}</div>
-          </div>
-          <div class="conv-meta">
-            ${c.last ? `<div class="conv-time">${fmtShort(c.last.ts)}</div>` : ''}
-            ${c.unread > 0 ? `<div class="unread-dot"></div>` : ''}
-          </div>
-        </div>`;
+      const color = avatarColor(c.email);
+      return `<div class="conv-item ${active}" onclick="openChat('${esc(c.email)}')"><div class="avatar av-md" style="background:${color}">${esc(initials(c.name))}</div><div class="conv-info"><div class="conv-name">${esc(c.name)}</div><div class="conv-preview">${esc(preview.slice(0,55))}</div></div><div class="conv-meta">${c.last ? `<div class="conv-time">${fmtShort(c.last.ts)}</div>` : ''}</div></div>`;
     }).join('');
   }
 
-  // Chat area HTML
   let chatHTML = '';
   if (!chatWith) {
-    chatHTML = `
-      <div class="chat-blank">
-        <div class="chat-blank-icon">💬</div>
-        <div class="chat-blank-text">Select a conversation</div>
-      </div>`;
+    chatHTML = `<div class="chat-blank"><div class="chat-blank-icon">💬</div><div class="chat-blank-text">Select a conversation</div></div>`;
   } else {
-    const contact = users[chatWith];
-    const cname   = contact?.name || chatWith;
-    const color   = avatarColor(chatWith);
-    chatHTML = `
-      <div class="chat-head">
-        <div class="back-chevron" onclick="backToList()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15,18 9,12 15,6"/></svg>
-        </div>
-        <div class="avatar av-sm" style="background:${color}">${esc(initials(cname))}</div>
-        <div class="chat-head-info">
-          <div class="chat-head-name">${esc(cname)}</div>
-          <div class="chat-head-email">${esc(chatWith)}</div>
-        </div>
-      </div>
-      <div class="messages-area" id="msg-area">${buildMessages()}</div>
-      <div class="chat-input-row">
-        <textarea class="chat-textarea" id="chat-ta" placeholder="Message…" rows="1"></textarea>
-        <button class="send-btn" id="send-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
-        </button>
-      </div>`;
+    const convKey = [me.email, chatWith].sort().join('~~~');
+    const msgs = serverData.conversations[convKey] || [];
+    const chatName = users[chatWith]?.name || chatWith;
+    const msgHTML = msgs.map((m) => {
+      const ismine = m.from === me.email;
+      return `<div class="msg-row ${ismine ? 'mine' : 'theirs'}"><div class="msg-group"><div class="msg-bubble">${esc(m.text)}</div><div class="msg-time">${fmtTime(m.ts)}</div></div></div>`;
+    }).join('');
+
+    chatHTML = `<div class="chat-head"><span class="back-chevron" onclick="chatWith=null; mobileView='list'; renderApp();">←</span><div class="chat-head-info"><div class="chat-head-name">${esc(chatName)}</div><div class="chat-head-email">${esc(chatWith)}</div></div></div><div class="messages-area" id="msg-area">${msgHTML}</div><div class="chat-input-row"><textarea id="chat-ta" class="chat-textarea" placeholder="Type a message..." rows="1"></textarea><button class="send-btn" onclick="sendMsg()">➤</button></div>`;
   }
 
-  // Profile panel
-  let profileHTML = '';
-  if (panel === 'profile') {
-    const contacts_count = contacts.length;
-    profileHTML = `
-      <div class="profile-slide">
-        <div class="slide-head">
-          <button class="back-link" onclick="closePanel()">← Back</button>
-          <div class="slide-title">Profile</div>
-        </div>
-        <div class="profile-body">
-          <div class="avatar av-lg" style="background:${avatarColor(me.email)}">${esc(initials(me.name))}</div>
-          <div class="profile-name-lg">${esc(me.name)}</div>
-          <div class="profile-email-lg">${esc(me.email)}</div>
-          <div class="info-row" style="width:100%;max-width:380px">
-            <span class="info-label">Contacts</span>
-            <span class="info-val">${contacts_count}</span>
-          </div>
-          <div class="info-row" style="width:100%;max-width:380px">
-            <span class="info-label">Account</span>
-            <span class="info-val" style="font-size:12px;color:var(--text-muted)">${esc(me.email)}</span>
-          </div>
-          <button class="logout-btn" onclick="confirmLogout()">Sign Out</button>
-        </div>
-      </div>`;
-  }
+  const profileHTML = !panel ? '' : `<div class="profile-slide"><div class="slide-head"><button class="back-link" onclick="panel=null; renderApp();">← Back</button><div class="slide-title">Profile</div></div><div class="profile-body"><div class="avatar av-lg" style="background:${avatarColor(me.email)}">${esc(initials(me.name))}</div><div class="profile-name-lg">${esc(me.name)}</div><div class="profile-email-lg">${esc(me.email)}</div><button class="logout-btn" onclick="doLogout()">Log Out</button></div></div>`;
 
-  // Add contact modal
-  let modalHTML = '';
-  if (showModal === 'add') {
-    modalHTML = `
-      <div class="overlay" id="overlay">
-        <div class="modal">
-          <div class="modal-title">New Conversation</div>
-          <div class="modal-desc">Enter the email address of someone with a Liam Chats account.</div>
-          <div class="err-box" id="add-err"></div>
-          <div class="form-group">
-            <label class="form-label">Their Email</label>
-            <input id="i-contact" class="form-input" type="email" placeholder="friend@example.com" autocomplete="off">
-          </div>
-          <div class="modal-foot">
-            <button class="btn-ghost" onclick="closeModal()">Cancel</button>
-            <button class="btn-modal-ok" id="add-btn">Start Chat</button>
-          </div>
-        </div>
-      </div>`;
-  }
+  const modalHTML = !showModal ? '' : `<div class="overlay"><div class="modal"><div class="modal-title">Add Contact</div><div class="modal-desc">Enter their email to start chatting.</div><div class="err-box" id="add-err"></div><div class="form-group"><input id="i-contact" class="form-input" type="email" placeholder="friend@example.com"></div><div class="modal-foot"><button class="btn-ghost" onclick="showModal=null; renderApp();">Cancel</button><button class="btn-modal-ok" onclick="doAddContact(event)">Add</button></div></div></div>`;
 
-  document.getElementById('app').innerHTML = `
-    <div class="app-layout">
-      <div class="sidebar ${sideHide}">
-        <div class="sidebar-head">
-          <div class="sidebar-wordmark">Liam Chats</div>
-          <div class="sidebar-acts">
-            <div class="icon-btn" onclick="openModal('add')" title="New chat">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </div>
-            <div class="icon-btn" onclick="openPanel('profile')" title="Profile">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-            </div>
-          </div>
-        </div>
-        <div class="search-wrap">
-          <input class="search-input" id="search-i" placeholder="Search conversations…" value="${esc(searchQ)}" oninput="onSearch(this.value)">
-        </div>
-        <div class="conv-section-label">Messages</div>
-        <div class="conv-list">${convListHTML}</div>
-      </div>
-      <div class="chat-area ${chatHide}">${chatHTML}</div>
-      ${profileHTML}
-      ${modalHTML}
-    </div>`;
+  document.getElementById('app').innerHTML = `<div class="app-layout"><div class="sidebar ${sideHide}"><div class="sidebar-head"><div class="sidebar-wordmark">Liam Chats</div><div class="sidebar-acts"><button class="icon-btn" onclick="showModal='add'; renderApp();" title="Add Contact">+</button><button class="icon-btn" onclick="panel='profile'; renderApp();" title="Profile">👤</button></div></div><div class="search-wrap"><input class="search-input" type="text" placeholder="Search..." id="search-input"></div><div class="conv-list">${convListHTML}</div></div><div class="chat-area ${chatHide}">${chatHTML}</div>${profileHTML}${modalHTML}</div>`;
 
-  // Wire up chat textarea / send
-  const ta   = $('chat-ta');
-  const sBtn = $('send-btn');
-
-  if (ta) {
-    ta.addEventListener('input', function() {
-      this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
-    });
-    ta.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-    });
-    if (!isMobile) setTimeout(() => ta.focus(), 30);
-  }
-
-  if (sBtn) sBtn.addEventListener('click', sendMsg);
-
-  // Wire up add contact modal
-  if (showModal === 'add') {
-    const addBtn  = $('add-btn');
-    const addInput = $('i-contact');
-    if (addBtn)  addBtn.addEventListener('click', doAddContact);
-    if (addInput) {
-      addInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter')  doAddContact(e);
-        if (e.key === 'Escape') closeModal();
-      });
-      setTimeout(() => addInput.focus(), 80);
-    }
-    const ov = $('overlay');
-    if (ov) ov.addEventListener('click', e => { if (e.target === ov) closeModal() });
-  }
-
-  // Scroll messages
-  setTimeout(scrollBottom, 30);
+  const searchInput = $('search-input');
+  if (searchInput) searchInput.addEventListener('input', e => { searchQ = e.target.value; renderApp(); });
 }
 
-/* ═══════════════════════════════════════════════════════
-   BUILD MESSAGES HTML
-═══════════════════════════════════════════════════════ */
-function buildMessages() {
-  if (!chatWith) return '';
-  const id   = convId(me.email, chatWith);
-  const msgs = getMessages(id);
+function updateMsgArea() { if (chatWith && me) renderApp(); }
+function updateConvList() { if (me) renderApp(); }
 
-  if (msgs.length === 0) {
-    return `<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:24px">Say hello! 👋</div>`;
-  }
-
-  // Mark read
-  let changed = false;
-  msgs.forEach(m => { if (m.from !== me.email && !m.read) { m.read = true; changed = true; } });
-  if (changed) setMessages(id, msgs);
-
-  let lastDate = null, html = '';
-  msgs.forEach(msg => {
-    const ds = fmtDate(msg.ts);
-    if (ds !== lastDate) {
-      html += `<div class="date-chip">${ds}</div>`;
-      lastDate = ds;
-    }
-    const mine = msg.from === me.email;
-    html += `
-      <div class="msg-row ${mine?'mine':'theirs'}">
-        <div class="msg-group">
-          <div class="msg-bubble">${esc(msg.text)}</div>
-          <div class="msg-time">${fmtTime(msg.ts)}</div>
-        </div>
-      </div>`;
-  });
-  return html;
-}
-
-/* ═══════════════════════════════════════════════════════
-   PARTIAL UPDATES (avoid full re-render while chatting)
-═══════════════════════════════════════════════════════ */
-function updateMsgArea() {
-  const el = $('msg-area');
-  if (!el || !chatWith) return;
-  const wasAtBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 60;
-  el.innerHTML = buildMessages();
-  if (wasAtBottom) el.scrollTop = el.scrollHeight;
-}
-
-function updateConvList() {
-  const el = document.querySelector('.conv-list');
-  if (!el) return;
-  // Re-render conv list only
-  const users    = getUsers();
-  const contacts = getContacts(me.email);
-  const convs = contacts.map(email => {
-    const id   = convId(me.email, email);
-    const msgs = getMessages(id);
-    const last = msgs[msgs.length - 1] || null;
-    const unread = msgs.filter(m => m.from !== me.email && !m.read).length;
-    return { email, name: users[email]?.name || email, last, unread, ts: last?.ts || 0 };
-  }).sort((a,b) => b.ts - a.ts);
-  const filtered = searchQ
-    ? convs.filter(c => c.name.toLowerCase().includes(searchQ.toLowerCase()) || c.email.toLowerCase().includes(searchQ.toLowerCase()))
-    : convs;
-
-  if (filtered.length === 0) {
-    el.innerHTML = `
-      <div class="conv-empty">
-        <span class="conv-empty-title">${contacts.length === 0 ? 'No contacts yet' : 'No results'}</span>
-        ${contacts.length === 0 ? 'Tap <strong>+</strong> to start a conversation.' : 'Try a different search.'}
-      </div>`;
-    return;
-  }
-  el.innerHTML = filtered.map(c => {
-    const active  = c.email === chatWith ? 'active' : '';
-    const preview = c.last ? (c.last.from === me.email ? 'You: ' : '') + c.last.text : 'No messages yet';
-    const color   = avatarColor(c.email);
-    return `
-      <div class="conv-item ${active}" onclick="openChat('${esc(c.email)}')">
-        <div class="avatar av-md" style="background:${color}">${esc(initials(c.name))}</div>
-        <div class="conv-info">
-          <div class="conv-name">${esc(c.name)}</div>
-          <div class="conv-preview">${esc(preview.slice(0,55))}</div>
-        </div>
-        <div class="conv-meta">
-          ${c.last ? `<div class="conv-time">${fmtShort(c.last.ts)}</div>` : ''}
-          ${c.unread > 0 ? `<div class="unread-dot"></div>` : ''}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-/* ═══════════════════════════════════════════════════════
-   NAV / PANEL / MODAL
-═══════════════════════════════════════════════════════ */
-function openPanel(p)  { panel = p; showModal = null; renderApp() }
-function closePanel()  { panel = null; renderApp() }
-function openModal(m)  { showModal = m; panel = null; renderApp() }
-function closeModal()  { showModal = null; renderApp() }
-function backToList()  { mobileView = 'list'; chatWith = null; renderApp() }
-function onSearch(q)   { searchQ = q; updateConvList() }
-
-function confirmLogout() {
-  if (confirm('Sign out of Liam Chats?')) doLogout();
-}
-
-/* ═══════════════════════════════════════════════════════
-   MASTER RENDER
-═══════════════════════════════════════════════════════ */
 function render() {
-  if (!me) renderAuth();
-  else     renderApp();
+  if (!me) {
+    renderAuth();
+  } else {
+    if (!socket || !socket.connected) initSocket();
+    if (socket && socket.connected) socket.emit("load_user_data", me.email);
+    renderApp();
+  }
 }
 
 init();
